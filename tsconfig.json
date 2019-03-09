@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
     "lib": ["dom", "es2017"],
@@ -13,39 +12,14 @@
     "noUnusedParameters": false,
     "preserveConstEnums": true,
     "removeComments": false,
-    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "es5",
     "outDir": "dist"
   },
-  // "include": [
-  //   "./server/**/*.ts",
-  //   "./src/**/*"
-  // ],
   "exclude": [
     "dist",
     "node_modules",
     ".next"
   ]
 }
-
-// {
-//   "compilerOptions": {
-//     "target": "ES5",
-//     "module": "system",
-//     "moduleResolution": "node",
-//     "jsx": "preserve",
-//     "sourceMap": true,
-//     "emitDecoratorMetadata": true,
-//     "experimentalDecorators": true,
-//     "removeComments": false,
-//     "noImplicitAny": false,
-//     "outDir": "dist"
-//   },
-//   "exclude": [
-//     "node_modules",
-//     "build",
-//     ".next"
-//   ]
-// }

@@ -41,6 +41,9 @@
     "cross-env": "^5.2.0",
     "nodemon": "^1.18.8",
     "ts-node": "^7.0.1",
-    "typescript": "^3.2.0"
+    "tslint": "^5.13.1",
+    "tslint-microsoft-contrib": "^6.1.0",
+    "typescript": "^3.3.3333",
+    "typescript-tslint-plugin": "^0.3.1"
   }
 }
