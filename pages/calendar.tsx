@@ -1,30 +1,135 @@
-import React from "react";
-import Link from "next/link";
-import Router from "next/router";
-import Layout from "../components/layout/layout";
+
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
 // @ts-ignore
 import { NextAuth } from "next-auth/client";
+import Link from "next/link";
+import Router from "next/router";
+import React from "react";
+import Layout from "../components/layout/layout";
 
-export default class extends React.Component {
-    static async getInitialProps({ req }) {
+const courtCaseTest: ICourtCase = {
+    fileNo: "Nr. eB2-1047-730/2018",
+    court: "Kauno Apylinkės Teismas",
+    courtNo: " Kauno rūmai",
+    firstName: "Vardenis",
+    lastName: "Pavardenis",
+    phoneNumber: "+37012345678",
+};
+
+type Nullable<T> = T | null;
+
+interface ICourtCase {
+    fileNo: string;
+    court: string;
+    courtNo: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+}
+
+interface ICourtCases {
+    time: string;
+    courtCases: [Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>];
+}
+
+const data: ICourtCases[] = [
+    { time: "8:00", courtCases: [null, courtCaseTest, null, null, null, null, null] },
+    { time: "8:30", courtCases: [null, null, null, null, null, null, courtCaseTest] },
+    { time: "9:00", courtCases: [null, null, courtCaseTest, null, null, null, null] },
+    { time: "9:30", courtCases: [null, null, null, null, courtCaseTest, null, null] },
+    { time: "10:00", courtCases: [null, null, null, null, null, null, null] },
+    { time: "10:30", courtCases: [null, courtCaseTest, null, courtCaseTest, null, null, null] },
+    { time: "11:00", courtCases: [null, null, null, null, null, courtCaseTest, null] },
+    { time: "11:30", courtCases: [courtCaseTest, null, null, courtCaseTest, null, null, null] },
+    { time: "12:00", courtCases: [null, null, null, courtCaseTest, null, courtCaseTest, null] },
+];
+
+interface IProps {
+    session: any;
+}
+
+interface IState {
+    data: ICourtCases[];
+}
+
+export default class Calendar extends React.Component<IProps, IState> {
+    constructor(props) {
+        super(props);
+        this.state = {
+            data: data,
+        };
+    }
+
+    public static async getInitialProps({ req }) {
         return {
             session: await NextAuth.init({ req, force: true })
         }
     }
 
-    async componentDidMount() {
-        // // Get latest session data after rendering on client then redirect.
-        // // The ensures client state is always updated after signing in or out.
-        // const session = await NextAuth.init({ force: true });
-        // // Router.push("/calendar");
-    }
-
-    render() {
+    public render() {
         console.log(this.props);
         return (
             <Layout>
-                "aaa"
+                <Typography variant="h3">Calendar</Typography>
+                <Grid container style={{ marginTop: "24px" }}>
+                    {this.state.data.map(o => <CalendarRow time={o.time} courtCases={o.courtCases}></CalendarRow>)}
+                </Grid>
             </Layout>
         );
     }
+}
+
+function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
+    const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
+    const { courtCases, time } = props;
+    const isCasesNotEmpty = courtCases.some(courtCase => courtCase != null);
+    return (
+        <Grid
+            item
+            container
+            direction="row"
+            wrap="nowrap"
+            spacing={8}
+            style={{ marginTop: "4px" }}
+        >
+            <Grid item style={{ minHeight: "75px", width: "55px", paddingRight: "25px" }}>
+                <div style={{ position: "absolute", height: "150px", marginLeft: "50px", marginTop: "-15px", width: "1px", backgroundColor: "#e0e0e0" }}></div>
+                <div style={{ marginTop: "-15px" }}>
+                    <Typography>
+                        {time}
+                    </Typography>
+                    <div style={{ position: "absolute", margin: "auto", height: "1px", backgroundColor: "#e0e0e0", marginTop: "-10px", marginLeft: "40px", left: 20, right: 0 }} />
+                </div>
+            </Grid>
+
+            {isCasesNotEmpty
+                && courtCases.map(o =>
+                    <Grid item xs style={calendarItemStyle}>
+                        {o != null && <CalendarItem courtCase={o} />}
+                    </Grid>
+                )}
+        </Grid>
+    );
+}
+
+function CalendarItem(props: { courtCase: ICourtCase }) { // tslint:disable-line:function-name
+    const { fileNo, court, courtNo, firstName, lastName, phoneNumber } = props.courtCase;
+    return (
+        <Paper style={{ height: "100%", padding: "8px" }}>
+            <Typography variant="subtitle2" gutterBottom>
+                {fileNo}
+            </Typography>
+            <Typography>
+                {court}
+            </Typography>
+            <Typography gutterBottom>
+                {courtNo}
+            </Typography>
+            <Typography>
+                {firstName} {lastName} {phoneNumber}
+            </Typography>
+        </Paper>
+    );
 }

@@ -42,7 +42,9 @@
     "no-require-imports": false,
     "no-submodule-imports": [
       true,
-      "@material-ui"
+      "@material-ui",
+      "next",
+      "next-auth"
     ],
     "no-suspicious-comment": false,
     "no-unused-expression": false,
@@ -66,7 +68,8 @@
       {
         "style": "static"
       }
-    ]
+    ],
+    "strict-boolean-expressions": [true, "ignore-rhs"]
   },
   "rulesDirectory": "node_modules/tslint-microsoft-contrib"
 }
