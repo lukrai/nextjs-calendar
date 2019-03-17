@@ -2,6 +2,8 @@
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import Block from "@material-ui/icons/Block";
+import IconButton from "@material-ui/core/IconButton";
 // @ts-ignore
 import { NextAuth } from "next-auth/client";
 import Link from "next/link";
@@ -21,12 +23,13 @@ const courtCaseTest: ICourtCase = {
 type Nullable<T> = T | null;
 
 interface ICourtCase {
-    fileNo: string;
-    court: string;
-    courtNo: string;
-    firstName: string;
-    lastName: string;
-    phoneNumber: string;
+    fileNo?: string;
+    court?: string;
+    courtNo?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    isDisabled?: boolean;
 }
 
 interface ICourtCases {
@@ -35,7 +38,7 @@ interface ICourtCases {
 }
 
 const data: ICourtCases[] = [
-    { time: "8:00", courtCases: [null, courtCaseTest, null, null, null, null, null] },
+    { time: "8:00", courtCases: [null, courtCaseTest, null, null, null, null, { isDisabled: true }] },
     { time: "8:30", courtCases: [null, null, null, null, null, null, courtCaseTest] },
     { time: "9:00", courtCases: [null, null, courtCaseTest, null, null, null, null] },
     { time: "9:30", courtCases: [null, null, null, null, courtCaseTest, null, null] },
@@ -105,11 +108,30 @@ function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
             </Grid>
 
             {isCasesNotEmpty
-                && courtCases.map(o =>
-                    <Grid item xs style={calendarItemStyle}>
-                        {o != null && <CalendarItem courtCase={o} />}
-                    </Grid>
-                )}
+                && courtCases.map(o => {
+                    if (o != null && o.isDisabled !== true) {
+                        return <Grid item xs style={calendarItemStyle}>
+                            <CalendarItem courtCase={o} />
+                        </Grid>;
+                    } else if (o != null && o.isDisabled === true) {
+                        return <Grid item xs style={calendarItemStyle}>
+                            <Paper style={{ height: "100%", padding: "8px", backgroundColor: "#e57373" }}>
+                                <Grid container justify="center">
+                                    <Block color="disabled" style={{ fontSize: "7em" }} />
+                                </Grid>
+                            </Paper>
+                        </Grid>;
+                    }
+
+                    return (<Grid item container xs style={calendarItemStyle}>
+                        <Grid item xs={10}></Grid>
+                        <Grid item xs={2}>
+                            <IconButton>
+                                <Block style={{ fontSize: "0.5em" }}></Block>
+                            </IconButton>
+                        </Grid>
+                    </Grid>); //https://stackoverflow.com/questions/47832919/material-ui-open-menu-by-event-hover
+                })}
         </Grid>
     );
 }
