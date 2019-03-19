@@ -34,17 +34,19 @@ interface ICourtCase {
     isDisabled?: boolean;
 }
 
+type ICourtCasesTuple = [Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>];
+
 interface ICourtCases {
     time: string;
-    courtCases: [Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>];
-    rowIndex?: number;
+    courtCases: ICourtCasesTuple;
 }
 
 interface IGridRowItem extends ICourtCases {
     rowIndex: number;
+    disableGridItem(rowIndex: number, columnIndex: number): void;
 }
 
-const data: ICourtCases[] = [
+const initialData: ICourtCases[] = [
     { time: "8:00", courtCases: [null, courtCaseTest, null, null, null, null, { isDisabled: true }] },
     { time: "8:30", courtCases: [null, null, null, null, null, null, courtCaseTest] },
     { time: "9:00", courtCases: [null, null, courtCaseTest, null, null, null, null] },
@@ -68,8 +70,10 @@ export default class Calendar extends React.Component<IProps, IState> {
     constructor(props) {
         super(props);
         this.state = {
-            data: data,
+            data: initialData,
         };
+
+        this.disableGridItem = this.disableGridItem.bind(this);
     }
 
     public static async getInitialProps({ req }) {
@@ -79,19 +83,33 @@ export default class Calendar extends React.Component<IProps, IState> {
     }
 
     public render() {
-        console.log(this.props);
         return (
             <Layout>
                 <Typography variant="h3">Calendar</Typography>
                 <Grid container style={{ marginTop: "24px" }}>
-                    {this.state.data.map((o, index) => <CalendarRow time={o.time} courtCases={o.courtCases} rowIndex={index} ></CalendarRow>)}
+                    {this.state.data.map((o, index) => <CalendarRow time={o.time} courtCases={o.courtCases} rowIndex={index} disableGridItem={this.disableGridItem}></CalendarRow>)}
                 </Grid>
             </Layout>
         );
     }
 
-    private disableGridItem(rowIndex, columnIndex) {
-        this.setState({})
+    private disableGridItem(rowIndex: number, columnIndex: number) {
+        this.setState((state) => {
+            const data = state.data.map((o, i) => {
+                if (rowIndex === i) {
+                    const courtCases = o.courtCases.map((courtCase, j) => {
+                        if (columnIndex === j) {
+                            return { ...courtCase, isDisabled: true };
+                        }
+                        return courtCase;
+                    }) as ICourtCasesTuple;
+                    return {...o, ...{courtCases}};
+                } else {
+                    return o;
+                }
+            });
+            return { data };
+        });
     }
 }
 
@@ -122,10 +140,11 @@ function CalendarRow(props: IGridRowItem) { // tslint:disable-line:function-name
                     if (o != null && o.isDisabled !== true) {
                         return <CalendarItem courtCase={o} />;
                     } else if (o != null && o.isDisabled === true) {
+                        console.log(`o.isDisabled: ${o.isDisabled}, index ${index}`)
                         return <DisabledItem />;
                     }
 
-                    return <EmptyItem itemIndex={index}/>;
+                    return <EmptyItem rowIndex={rowIndex} columnIndex={index} disableGridItem={props.disableGridItem} />;
                 })}
         </Grid>
     );
@@ -174,7 +193,7 @@ function EmptyItem(props) { // tslint:disable-line:function-name
                 onMouseOver={() => setIsVisible(true)}
                 style={{ backgroundColor: isVisible ? "#e0e0e0" : "", opacity: isVisible ? 1 : 0, borderRadius: "4px" }}
                 onMouseOut={() => setIsVisible(false)}>
-                <IconButton color="secondary">
+                <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
                     <Block style={{ fontSize: "0.5em" }}></Block>
                 </IconButton>
             </Grid>
