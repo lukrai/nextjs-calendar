@@ -1,15 +1,17 @@
 
 import Grid from "@material-ui/core/Grid";
+import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import Block from "@material-ui/icons/Block";
-import IconButton from "@material-ui/core/IconButton";
 // @ts-ignore
 import { NextAuth } from "next-auth/client";
 import Link from "next/link";
 import Router from "next/router";
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../components/layout/layout";
+
+const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
 
 const courtCaseTest: ICourtCase = {
     fileNo: "Nr. eB2-1047-730/2018",
@@ -85,7 +87,6 @@ export default class Calendar extends React.Component<IProps, IState> {
 }
 
 function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
-    const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
     const { courtCases, time } = props;
     const isCasesNotEmpty = courtCases.some(courtCase => courtCase != null);
     return (
@@ -110,27 +111,12 @@ function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
             {isCasesNotEmpty
                 && courtCases.map(o => {
                     if (o != null && o.isDisabled !== true) {
-                        return <Grid item xs style={calendarItemStyle}>
-                            <CalendarItem courtCase={o} />
-                        </Grid>;
+                        return <CalendarItem courtCase={o} />;
                     } else if (o != null && o.isDisabled === true) {
-                        return <Grid item xs style={calendarItemStyle}>
-                            <Paper style={{ height: "100%", padding: "8px", backgroundColor: "#e57373" }}>
-                                <Grid container justify="center">
-                                    <Block color="disabled" style={{ fontSize: "7em" }} />
-                                </Grid>
-                            </Paper>
-                        </Grid>;
+                        return <DisabledItem />;
                     }
 
-                    return (<Grid item container xs style={calendarItemStyle}>
-                        <Grid item xs={10}></Grid>
-                        <Grid item xs={2}>
-                            <IconButton>
-                                <Block style={{ fontSize: "0.5em" }}></Block>
-                            </IconButton>
-                        </Grid>
-                    </Grid>); //https://stackoverflow.com/questions/47832919/material-ui-open-menu-by-event-hover
+                    return <EmptyItem />;
                 })}
         </Grid>
     );
@@ -139,19 +125,50 @@ function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
 function CalendarItem(props: { courtCase: ICourtCase }) { // tslint:disable-line:function-name
     const { fileNo, court, courtNo, firstName, lastName, phoneNumber } = props.courtCase;
     return (
-        <Paper style={{ height: "100%", padding: "8px" }}>
-            <Typography variant="subtitle2" gutterBottom>
-                {fileNo}
-            </Typography>
-            <Typography>
-                {court}
-            </Typography>
-            <Typography gutterBottom>
-                {courtNo}
-            </Typography>
-            <Typography>
-                {firstName} {lastName} {phoneNumber}
-            </Typography>
-        </Paper>
+        <Grid item xs style={calendarItemStyle}>
+            <Paper style={{ height: "100%", padding: "8px" }}>
+                <Typography variant="subtitle2" gutterBottom>
+                    {fileNo}
+                </Typography>
+                <Typography>
+                    {court}
+                </Typography>
+                <Typography gutterBottom>
+                    {courtNo}
+                </Typography>
+                <Typography>
+                    {firstName} {lastName} {phoneNumber}
+                </Typography>
+            </Paper>
+        </Grid>
+    );
+}
+
+function DisabledItem(props) { // tslint:disable-line:function-name
+    return (
+        <Grid item xs style={calendarItemStyle}>
+            <Paper style={{ height: "100%", backgroundColor: "#e57373" }}>
+                <Grid container justify="center">
+                    <Block color="disabled" style={{ fontSize: "7em" }} />
+                </Grid>
+            </Paper>
+        </Grid>);
+}
+
+function EmptyItem(props) { // tslint:disable-line:function-name
+    const [isVisible, setIsVisible] = useState(false);
+
+    return (
+        <Grid item container xs style={calendarItemStyle} >
+            <Grid item xs={10}></Grid>
+            <Grid item xs={2}
+                onMouseOver={() => setIsVisible(true)}
+                style={{ backgroundColor: isVisible ? "#e0e0e0" : "", opacity: isVisible ? 1 : 0, borderRadius: "4px" }}
+                onMouseOut={() => setIsVisible(false)}>
+                <IconButton color="secondary">
+                    <Block style={{ fontSize: "0.5em" }}></Block>
+                </IconButton>
+            </Grid>
+        </Grid>
     );
 }
