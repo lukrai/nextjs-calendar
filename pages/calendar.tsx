@@ -37,6 +37,11 @@ interface ICourtCase {
 interface ICourtCases {
     time: string;
     courtCases: [Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>];
+    rowIndex?: number;
+}
+
+interface IGridRowItem extends ICourtCases {
+    rowIndex: number;
 }
 
 const data: ICourtCases[] = [
@@ -79,15 +84,19 @@ export default class Calendar extends React.Component<IProps, IState> {
             <Layout>
                 <Typography variant="h3">Calendar</Typography>
                 <Grid container style={{ marginTop: "24px" }}>
-                    {this.state.data.map(o => <CalendarRow time={o.time} courtCases={o.courtCases}></CalendarRow>)}
+                    {this.state.data.map((o, index) => <CalendarRow time={o.time} courtCases={o.courtCases} rowIndex={index} ></CalendarRow>)}
                 </Grid>
             </Layout>
         );
     }
+
+    private disableGridItem(rowIndex, columnIndex) {
+        this.setState({})
+    }
 }
 
-function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
-    const { courtCases, time } = props;
+function CalendarRow(props: IGridRowItem) { // tslint:disable-line:function-name
+    const { courtCases, time, rowIndex } = props;
     const isCasesNotEmpty = courtCases.some(courtCase => courtCase != null);
     return (
         <Grid
@@ -109,14 +118,14 @@ function CalendarRow(props: ICourtCases) { // tslint:disable-line:function-name
             </Grid>
 
             {isCasesNotEmpty
-                && courtCases.map(o => {
+                && courtCases.map((o, index) => {
                     if (o != null && o.isDisabled !== true) {
                         return <CalendarItem courtCase={o} />;
                     } else if (o != null && o.isDisabled === true) {
                         return <DisabledItem />;
                     }
 
-                    return <EmptyItem />;
+                    return <EmptyItem itemIndex={index}/>;
                 })}
         </Grid>
     );
