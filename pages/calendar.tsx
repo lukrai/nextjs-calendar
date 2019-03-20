@@ -103,7 +103,7 @@ export default class Calendar extends React.Component<IProps, IState> {
                         }
                         return courtCase;
                     }) as ICourtCasesTuple;
-                    return {...o, ...{courtCases}};
+                    return { ...o, ...{ courtCases } };
                 } else {
                     return o;
                 }
@@ -173,30 +173,52 @@ function CalendarItem(props: { courtCase: ICourtCase }) { // tslint:disable-line
 }
 
 function DisabledItem(props) { // tslint:disable-line:function-name
+    const [isVisible, setIsVisible] = useState(false);
+
     return (
         <Grid item xs style={calendarItemStyle}>
-            <Paper style={{ height: "100%", backgroundColor: "#e57373" }}>
+            <Paper style={{ height: "100%", backgroundColor: "#e57373", position: "relative" }}>
                 <Grid container justify="center">
                     <Block color="disabled" style={{ fontSize: "7em" }} />
                 </Grid>
+                <div
+                    style={{
+                        height: "100%",
+                        position: "absolute",
+                        top: "0",
+                        right: "0",
+                        backgroundColor: isVisible ? "#e0e0e0" : "",
+                        opacity: isVisible ? 0.75 : 0,
+                        borderRadius: "4px",
+                    }}
+                    onMouseOver={() => setIsVisible(true)}
+                    onMouseOut={() => setIsVisible(false)}
+                >
+                    <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
+                        <Block style={{ fontSize: "0.5em" }}></Block>
+                    </IconButton>
+                </div>
             </Paper>
-        </Grid>);
+        </Grid>
+    );
 }
 
 function EmptyItem(props) { // tslint:disable-line:function-name
     const [isVisible, setIsVisible] = useState(false);
+    const itemStyle = { height: "100%", top: "0", right: "0", backgroundColor: isVisible ? "#e0e0e0" : "", opacity: isVisible ? 1 : 0, borderRadius: "4px" };
 
     return (
         <Grid item container xs style={calendarItemStyle} >
-            <Grid item xs={10}></Grid>
-            <Grid item xs={2}
+            <Grid item xs></Grid>
+            <div
+                style={itemStyle}
                 onMouseOver={() => setIsVisible(true)}
-                style={{ backgroundColor: isVisible ? "#e0e0e0" : "", opacity: isVisible ? 1 : 0, borderRadius: "4px" }}
-                onMouseOut={() => setIsVisible(false)}>
+                onMouseOut={() => setIsVisible(false)}
+            >
                 <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
                     <Block style={{ fontSize: "0.5em" }}></Block>
                 </IconButton>
-            </Grid>
+            </div>
         </Grid>
     );
 }
