@@ -117,7 +117,6 @@ export default class Calendar extends React.Component<IProps, IState> {
     private disableGridColumn(columnIndex: number) {
         this.setState((state) => {
             const data = state.data.map((o, i) => {
-                // if (rowIndex === i) {
                     const courtCases = o.courtCases.map((courtCase, j) => {
                         if (columnIndex === j) {
                             return { isDisabled: true} ;
@@ -125,9 +124,6 @@ export default class Calendar extends React.Component<IProps, IState> {
                         return courtCase;
                     }) as ICourtCasesTuple;
                     return { ...o, ...{ courtCases } };
-                // } else {
-                    // return o;
-                // }
             });
             return { data };
         });
