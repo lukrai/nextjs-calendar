@@ -74,6 +74,7 @@ export default class Calendar extends React.Component<IProps, IState> {
         };
 
         this.disableGridItem = this.disableGridItem.bind(this);
+        this.disableGridColumn = this.disableGridColumn.bind(this);
     }
 
     public static async getInitialProps({ req }) {
@@ -86,7 +87,8 @@ export default class Calendar extends React.Component<IProps, IState> {
         return (
             <Layout>
                 <Typography variant="h3">Calendar</Typography>
-                <Grid container style={{ marginTop: "24px" }}>
+                <Grid container style={{ marginTop: "24px" }} >
+                    <GridColumnHeadings disableGridColumn={this.disableGridColumn} columnCount={7}></GridColumnHeadings>
                     {this.state.data.map((o, index) => <CalendarRow time={o.time} courtCases={o.courtCases} rowIndex={index} disableGridItem={this.disableGridItem}></CalendarRow>)}
                 </Grid>
             </Layout>
@@ -107,6 +109,25 @@ export default class Calendar extends React.Component<IProps, IState> {
                 } else {
                     return o;
                 }
+            });
+            return { data };
+        });
+    }
+
+    private disableGridColumn(columnIndex: number) {
+        this.setState((state) => {
+            const data = state.data.map((o, i) => {
+                // if (rowIndex === i) {
+                    const courtCases = o.courtCases.map((courtCase, j) => {
+                        if (columnIndex === j) {
+                            return { isDisabled: true} ;
+                        }
+                        return courtCase;
+                    }) as ICourtCasesTuple;
+                    return { ...o, ...{ courtCases } };
+                // } else {
+                    // return o;
+                // }
             });
             return { data };
         });
@@ -179,24 +200,24 @@ function CalendarItem(props: IGridCalandarItem) { // tslint:disable-line:functio
                     {firstName} {lastName} {phoneNumber}
                 </Typography>
                 <div
-                 style={{
-                    height: "100%",
-                    position: "absolute",
-                    top: "0",
-                    right: "0",
-                    backgroundColor: isVisible ? "#e0e0e0" : "",
-                    opacity: isVisible ? 0.75 : 0,
-                    borderRadius: "4px",
-                }}
-                onMouseOver={() => setIsVisible(true)}
-                onMouseOut={() => setIsVisible(false)}
-            >
-                <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
-                    <Block style={{ fontSize: "0.5em" }}></Block>
-                </IconButton>
-            </div>
+                    style={{
+                        height: "100%",
+                        position: "absolute",
+                        top: "0",
+                        right: "0",
+                        backgroundColor: isVisible ? "#e0e0e0" : "",
+                        opacity: isVisible ? 0.75 : 0,
+                        borderRadius: "4px",
+                    }}
+                    onMouseOver={() => setIsVisible(true)}
+                    onMouseOut={() => setIsVisible(false)}
+                >
+                    <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
+                        <Block style={{ fontSize: "0.5em" }}></Block>
+                    </IconButton>
+                </div>
             </Paper>
-    
+
         </Grid>
     );
 }
@@ -250,4 +271,27 @@ function EmptyItem(props: IGridItem) { // tslint:disable-line:function-name
             </div>
         </Grid>
     );
+}
+
+function GridColumnHeadings(props: {columnCount: number, disableGridColumn(columnCount: number): void }) {
+    const headings: JSX.Element[] = [];
+    for (let i = 0; i < props.columnCount; i += 1) {
+        headings.push(
+            <Grid item xs style={calendarItemStyle} wrap="wrap">
+                <Typography variant="h3" gutterBottom >
+                K{i + 1}
+                <IconButton color="secondary" onClick={() => props.disableGridColumn(i)}>
+                    <Block style={{ fontSize: "0.5em" }}></Block>
+                </IconButton>
+                </Typography>
+            </Grid>,
+        );
+    }
+
+    return (
+        <Grid container justify="center" direction="row">
+            <Grid item style={{ width: "55px" }}></Grid>
+            {headings}
+        </Grid>
+    )
 }
