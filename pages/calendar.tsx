@@ -3,12 +3,18 @@ import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContentText from "@material-ui/core/DialogContentText";
 import Block from "@material-ui/icons/Block";
 // @ts-ignore
 import { NextAuth } from "next-auth/client";
 import Link from "next/link";
 import Router from "next/router";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import Layout from "../components/layout/layout";
 
 const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
@@ -117,13 +123,13 @@ export default class Calendar extends React.Component<IProps, IState> {
     private disableGridColumn(columnIndex: number) {
         this.setState((state) => {
             const data = state.data.map((o, i) => {
-                    const courtCases = o.courtCases.map((courtCase, j) => {
-                        if (columnIndex === j) {
-                            return { isDisabled: true} ;
-                        }
-                        return courtCase;
-                    }) as ICourtCasesTuple;
-                    return { ...o, ...{ courtCases } };
+                const courtCases = o.courtCases.map((courtCase, j) => {
+                    if (columnIndex === j) {
+                        return { isDisabled: true };
+                    }
+                    return courtCase;
+                }) as ICourtCasesTuple;
+                return { ...o, ...{ courtCases } };
             });
             return { data };
         });
@@ -269,16 +275,21 @@ function EmptyItem(props: IGridItem) { // tslint:disable-line:function-name
     );
 }
 
-function GridColumnHeadings(props: {columnCount: number, disableGridColumn(columnCount: number): void }) {
+function GridColumnHeadings(props: { columnCount: number, disableGridColumn(columnCount: number): void }) {
     const headings: JSX.Element[] = [];
     for (let i = 0; i < props.columnCount; i += 1) {
         headings.push(
             <Grid item xs style={calendarItemStyle} wrap="wrap">
                 <Typography variant="h3" gutterBottom >
-                K{i + 1}
-                <IconButton color="secondary" onClick={() => props.disableGridColumn(i)}>
-                    <Block style={{ fontSize: "0.5em" }}></Block>
-                </IconButton>
+                    K{i + 1}
+                    <IconButton color="secondary" onClick={() => props.disableGridColumn(i)}>
+                        <Block></Block>
+                    </IconButton>
+                    <AlertDialog callback={props.disableGridColumn.bind(null, i)}>
+                        <IconButton color="secondary">
+                            <Block></Block>
+                        </IconButton>
+                    </AlertDialog>
                 </Typography>
             </Grid>,
         );
@@ -290,4 +301,50 @@ function GridColumnHeadings(props: {columnCount: number, disableGridColumn(colum
             {headings}
         </Grid>
     )
+}
+
+function AlertDialog(props) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const callback = useCallback(
+        () => {
+          props.callback();
+          setIsOpen(false);
+        },
+        [],
+      );
+
+    return (
+        <div >
+            <div onClick={() => setIsOpen(true)}>
+            {props.children}
+            </div>
+            <Button variant="outlined" color="primary" onClick={() => setIsOpen(true)}>
+                Open alert dialog
+                </Button>
+
+            <Dialog
+                open={isOpen}
+                onClose={() => setIsOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Let Google help apps determine location. This means sending anonymous location data to
+                        Google, even when no apps are running.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setIsOpen(false)} color="primary">
+                        Disagree
+                    </Button>
+                    <Button onClick={() => callback()} color="primary" autoFocus>
+                        Agree
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+    );
 }
