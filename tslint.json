@@ -5,6 +5,7 @@
   },
   "extends": "tslint-microsoft-contrib",
   "rules": {
+    "react-a11y-event-has-role": false,
     "export-name": false,
     "chai-vague-errors": false,
     "function-name": [
