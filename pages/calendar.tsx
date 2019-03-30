@@ -8,8 +8,11 @@ import Block from "@material-ui/icons/Block";
 import { NextAuth } from "next-auth/client";
 import Link from "next/link";
 import Router from "next/router";
-import React, { useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
+import { AlertDialog } from "../components/dialogs/alertDialog";
 import Layout from "../components/layout/layout";
+import { ICourtCase, ICourtCases, ICourtCasesTuple } from "../dto";
+import { CalendarItem, DisabledItem, EmptyItem } from "../components/calendar/gridItems";
 
 const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
 
@@ -21,25 +24,6 @@ const courtCaseTest: ICourtCase = {
     lastName: "Pavardenis",
     phoneNumber: "+37012345678",
 };
-
-type Nullable<T> = T | null;
-
-interface ICourtCase {
-    fileNo?: string;
-    court?: string;
-    courtNo?: string;
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
-    isDisabled?: boolean;
-}
-
-type ICourtCasesTuple = [Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>, Nullable<ICourtCase>];
-
-interface ICourtCases {
-    time: string;
-    courtCases: ICourtCasesTuple;
-}
 
 interface IGridRowItem extends ICourtCases {
     rowIndex: number;
@@ -117,13 +101,13 @@ export default class Calendar extends React.Component<IProps, IState> {
     private disableGridColumn(columnIndex: number) {
         this.setState((state) => {
             const data = state.data.map((o, i) => {
-                    const courtCases = o.courtCases.map((courtCase, j) => {
-                        if (columnIndex === j) {
-                            return { isDisabled: true} ;
-                        }
-                        return courtCase;
-                    }) as ICourtCasesTuple;
-                    return { ...o, ...{ courtCases } };
+                const courtCases = o.courtCases.map((courtCase, j) => {
+                    if (columnIndex === j) {
+                        return { isDisabled: true };
+                    }
+                    return courtCase;
+                }) as ICourtCasesTuple;
+                return { ...o, ...{ courtCases } };
             });
             return { data };
         });
@@ -166,119 +150,22 @@ function CalendarRow(props: IGridRowItem) { // tslint:disable-line:function-name
     );
 }
 
-interface IGridItem {
-    rowIndex: number;
-    columnIndex: number;
-    disableGridItem(rowIndex: number, columnIndex: number): void;
-}
-
-interface IGridCalandarItem extends IGridItem {
-    courtCase: ICourtCase;
-}
-
-function CalendarItem(props: IGridCalandarItem) { // tslint:disable-line:function-name
-    const { fileNo, court, courtNo, firstName, lastName, phoneNumber } = props.courtCase;
-    const [isVisible, setIsVisible] = useState(false);
-
-    return (
-        <Grid item xs style={calendarItemStyle}>
-            <Paper style={{ height: "100%", padding: "8px", position: "relative" }}>
-                <Typography variant="subtitle2" gutterBottom>
-                    {fileNo}
-                </Typography>
-                <Typography>
-                    {court}
-                </Typography>
-                <Typography gutterBottom>
-                    {courtNo}
-                </Typography>
-                <Typography>
-                    {firstName} {lastName} {phoneNumber}
-                </Typography>
-                <div
-                    style={{
-                        height: "100%",
-                        position: "absolute",
-                        top: "0",
-                        right: "0",
-                        backgroundColor: isVisible ? "#e0e0e0" : "",
-                        opacity: isVisible ? 0.75 : 0,
-                        borderRadius: "4px",
-                    }}
-                    onMouseOver={() => setIsVisible(true)}
-                    onMouseOut={() => setIsVisible(false)}
-                >
-                    <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
-                        <Block style={{ fontSize: "0.5em" }}></Block>
-                    </IconButton>
-                </div>
-            </Paper>
-
-        </Grid>
-    );
-}
-
-function DisabledItem(props: IGridItem) { // tslint:disable-line:function-name
-    const [isVisible, setIsVisible] = useState(false);
-
-    return (
-        <Grid item xs style={calendarItemStyle}>
-            <Paper style={{ height: "100%", backgroundColor: "#e57373", position: "relative" }}>
-                <Grid container justify="center">
-                    <Block color="disabled" style={{ fontSize: "7em" }} />
-                </Grid>
-                <div
-                    style={{
-                        height: "100%",
-                        position: "absolute",
-                        top: "0",
-                        right: "0",
-                        backgroundColor: isVisible ? "#e0e0e0" : "",
-                        opacity: isVisible ? 0.75 : 0,
-                        borderRadius: "4px",
-                    }}
-                    onMouseOver={() => setIsVisible(true)}
-                    onMouseOut={() => setIsVisible(false)}
-                >
-                    <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
-                        <Block style={{ fontSize: "0.5em" }}></Block>
-                    </IconButton>
-                </div>
-            </Paper>
-        </Grid>
-    );
-}
-
-function EmptyItem(props: IGridItem) { // tslint:disable-line:function-name
-    const [isVisible, setIsVisible] = useState(false);
-    const itemStyle = { height: "100%", top: "0", right: "0", backgroundColor: isVisible ? "#e0e0e0" : "", opacity: isVisible ? 1 : 0, borderRadius: "4px" };
-
-    return (
-        <Grid item container xs style={calendarItemStyle} >
-            <Grid item xs></Grid>
-            <div
-                style={itemStyle}
-                onMouseOver={() => setIsVisible(true)}
-                onMouseOut={() => setIsVisible(false)}
-            >
-                <IconButton color="secondary" onClick={() => props.disableGridItem(props.rowIndex, props.columnIndex)}>
-                    <Block style={{ fontSize: "0.5em" }}></Block>
-                </IconButton>
-            </div>
-        </Grid>
-    );
-}
-
-function GridColumnHeadings(props: {columnCount: number, disableGridColumn(columnCount: number): void }) {
+function GridColumnHeadings(props: { columnCount: number, disableGridColumn(columnCount: number): void }) {
     const headings: JSX.Element[] = [];
     for (let i = 0; i < props.columnCount; i += 1) {
         headings.push(
             <Grid item xs style={calendarItemStyle} wrap="wrap">
-                <Typography variant="h3" gutterBottom >
-                K{i + 1}
-                <IconButton color="secondary" onClick={() => props.disableGridColumn(i)}>
-                    <Block style={{ fontSize: "0.5em" }}></Block>
-                </IconButton>
+                <Typography variant="h3" gutterBottom style={{ display: "flex" }}>
+                    K{i + 1}
+                    <AlertDialog
+                        title={"Disable grid elements in this column?"}
+                        message={"This will disable all columns in this grid and existing items will be lost. Continue?"}
+                        callback={props.disableGridColumn.bind(null, i)}
+                    >
+                        <IconButton color="primary">
+                            <Block></Block>
+                        </IconButton>
+                    </AlertDialog>
                 </Typography>
             </Grid>,
         );
