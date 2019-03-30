@@ -8,16 +8,7 @@
     "react-a11y-event-has-role": false,
     "export-name": false,
     "chai-vague-errors": false,
-    "function-name": [
-      true,
-      {
-        "method-regex": "^[a-z$][\\w\\d]+$",
-        "private-method-regex": "^[a-z][\\w\\d]+$",
-        "protected-method-regex": "^[a-z][\\w\\d]+$",
-        "static-method-regex": "^[a-z][\\w\\d]+$",
-        "function-regex": "^[a-z][\\w\\d]+$"
-      }
-    ],
+    "function-name": false,
     "import-name": false,
     "linebreak-style": false,
     "max-line-length": [
