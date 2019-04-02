@@ -2,6 +2,7 @@
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
+import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Block from "@material-ui/icons/Block";
 // @ts-ignore
@@ -9,10 +10,13 @@ import { NextAuth } from "next-auth/client";
 import Link from "next/link";
 import Router from "next/router";
 import React, { ReactNode, useCallback, useState } from "react";
+import DayPickerInput from "react-day-picker/DayPickerInput";
+import "react-day-picker/lib/style.css";
+import { CalendarItem, DisabledItem, EmptyItem } from "../components/calendar/gridItems";
+import {CustomDayPickerInput} from "../components/customDayPickerInput";
 import { AlertDialog } from "../components/dialogs/alertDialog";
 import Layout from "../components/layout/layout";
 import { ICourtCase, ICourtCases, ICourtCasesTuple } from "../dto";
-import { CalendarItem, DisabledItem, EmptyItem } from "../components/calendar/gridItems";
 
 const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
 
@@ -70,7 +74,7 @@ export default class Calendar extends React.Component<IProps, IState> {
     public render() {
         return (
             <Layout>
-                <Typography variant="h3">Calendar</Typography>
+                <CustomDayPickerInput/>
                 <Grid container style={{ marginTop: "24px" }} >
                     <GridColumnHeadings disableGridColumn={this.disableGridColumn} columnCount={7}></GridColumnHeadings>
                     {this.state.data.map((o, index) => <CalendarRow time={o.time} courtCases={o.courtCases} rowIndex={index} disableGridItem={this.disableGridItem}></CalendarRow>)}
