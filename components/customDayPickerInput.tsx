@@ -30,7 +30,11 @@ const WEEKDAYS_LONG = [
 
 const WEEKDAYS_SHORT = ['Sk', 'Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št'];
 
-const enabledDaysByMonths = [{ enabledDay: 0, fromDate: new Date(2019, 4, 15) }, { enabledDay: 1, fromDate: new Date(2019, 4, 1) }, { enabledDay: 2, fromDate: new Date(2019, 3, 15) }]
+const enabledDaysByMonths = [
+    { enabledDay: 0, fromDate: new Date(2019, 4, 15) },
+    { enabledDay: 1, fromDate: new Date(2019, 4, 1) },
+    { enabledDay: 2, fromDate: new Date(2019, 3, 15) },
+];
 
 export class CustomDayPickerInput extends React.Component<any, any> {
     constructor(props) {
@@ -64,11 +68,7 @@ export class CustomDayPickerInput extends React.Component<any, any> {
                         weekdaysShort: WEEKDAYS_SHORT,
                     }}
                 ></DayPickerInput>
-                {this.state.selectedDay ? (
-                    <p>You clicked {this.state.selectedDay.toLocaleDateString()}</p>
-                ) : (
-                        <p>Please select a day.</p>
-                    )}
+                {this.renderDateWarning(this.state.selectedDay)}
             </div>
         );
     }
@@ -78,15 +78,15 @@ export class CustomDayPickerInput extends React.Component<any, any> {
     }
 
     private modifier(date: Date) {
-        let tempEnabledDay = { enabledDay: 3, fromDate: new Date(2018) };
-        enabledDaysByMonths.length > 0 && enabledDaysByMonths.sort((a, b) => a.fromDate.getTime() - b.fromDate.getTime());
-        for (const o of enabledDaysByMonths) {
-            if (date != null && date > o.fromDate && date > tempEnabledDay.fromDate) {
-                tempEnabledDay = o;
-            }
-        }
+        const enabledWeekDay = getEnabledWeekDay(date);
+        return [0, 1, 2, 3, 4, 5, 6].filter(o => o !== enabledWeekDay);
+    }
 
-        return [0, 1, 2, 3, 4, 5, 6].filter(o => o !== tempEnabledDay.enabledDay);
+    private renderDateWarning(selectedDay: Date) {
+        if (!isCalendarDateValid(selectedDay, getEnabledWeekDay(selectedDay))) {
+            return <Typography style={{ alignSelf: "flex-end", marginLeft: "1em" }} variant="body2">Pasirinkta neteisinga data</Typography>
+        }
+        return null;
     }
 }
 
@@ -100,4 +100,19 @@ function DatePickerCustomInput(props) {
             {...props}
         />
     );
+}
+
+function getEnabledWeekDay(date: Date) {
+    let tempEnabledDay = { enabledDay: 3, fromDate: new Date(2018) };
+    enabledDaysByMonths.length > 0 && enabledDaysByMonths.sort((a, b) => a.fromDate.getTime() - b.fromDate.getTime());
+    for (const o of enabledDaysByMonths) {
+        if (date != null && date > o.fromDate && date > tempEnabledDay.fromDate) {
+            tempEnabledDay = o;
+        }
+    }
+    return tempEnabledDay.enabledDay;
+}
+
+function isCalendarDateValid(selectedDate: Date, enabledWeekDay: number) {
+    return selectedDate && selectedDate.getDay() === enabledWeekDay;
 }
