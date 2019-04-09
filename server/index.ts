@@ -69,6 +69,18 @@ nextApp.prepare()
 			return res.send({ a: " AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " });
 		})
 
+		expressApp.get('/calendar/', (req, res) => {
+			console.log(req.params)
+			return expressApp.render(req, res, '/calendar');
+			// return app.render(req, res, "/calendar", { slug: req.params.slug })
+		  });
+
+		expressApp.get('/calendar/:slug', (req, res) => {
+			console.log(req.params)
+			return expressApp.render(req, res, '/calendar', { slug: req.params.slug } );
+			// return app.render(req, res, "/calendar", { slug: req.params.slug })
+		  });
+
 		expressApp.get('*', (req: any, res: any) => {
 			return handle(req, res)
 		})
