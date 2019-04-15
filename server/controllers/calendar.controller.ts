@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Pool } from 'pg';
 import postgresPool from "../postgresPool";
+import uuidv4 from 'uuid/v4';
 
 export class CalendarController {
     private pool: Pool;
@@ -14,7 +15,22 @@ export class CalendarController {
         let newCourtCase = req.body;
         console.log(req.body);
         try {
+            // get Latest date
             await this.pool.query(`SELECT * FROM calendars`);
+            // if latest date is 'today' + 40 day and is wedneday then ok,
+            // else create wedneday which is + 40 (additional function) 
+            // insert the record.
+            const text = `INSERT INTO 
+            calendars(id, date)
+            VALUES($1, $2)
+            returning *`;
+
+            const values = [
+                uuidv4(),
+                new Date().toISOString().slice(0, 10),
+            ];
+            const { rows } = await this.pool.query(text, values);
+
         } catch (err) {
             // console.log(err);
         }

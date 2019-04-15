@@ -16,7 +16,7 @@ class PostgresPool {
         this.pool = new Pool(this.config);
         console.log("Pool initiated.");
         this.createTables();
-        // this.seedUsers();
+        this.seedUsers();
     }
 
     public getPool(): Pool {
@@ -76,7 +76,7 @@ class PostgresPool {
 
     private seedUsers() {
         const queryText = `INSERT INTO
-              users(id, first_name, last_name, email, phone_number, court, created_date, modified_date)
+              users(id, firstName, lastName, email, phoneNumber, court, dateCreated, dateModified)
               VALUES($1, $2, $3, $4, $5, $6, $7, $8)
               returning *`;
         const values = [
