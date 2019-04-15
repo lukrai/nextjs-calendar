@@ -8,6 +8,7 @@
     "react-a11y-event-has-role": false,
     "export-name": false,
     "chai-vague-errors": false,
+    "completed-docs": false,
     "function-name": false,
     "import-name": false,
     "linebreak-style": false,
@@ -32,11 +33,13 @@
     "no-parameter-properties": false,
     "no-relative-imports": false,
     "no-require-imports": false,
+    "no-import-side-effect": false,
     "no-submodule-imports": [
       true,
       "@material-ui",
       "next",
-      "next-auth"
+      "next-auth",
+      "react-day-picker"
     ],
     "no-suspicious-comment": false,
     "no-unused-expression": false,

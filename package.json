@@ -5,6 +5,7 @@
     "@material-ui/core": "latest",
     "@material-ui/icons": "^3.0.2",
     "@material-ui/styles": "latest",
+    "@zeit/next-css": "^1.0.1",
     "@zeit/next-typescript": "^1.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
@@ -19,6 +20,7 @@
     "passport-local": "^1.0.0",
     "pg": "^7.8.1",
     "react": "^16.8.3 ",
+    "react-day-picker": "^7.3.0",
     "react-dom": "^16.8.3",
     "uuid": "^3.3.2"
   },

@@ -2,6 +2,7 @@
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import Paper from "@material-ui/core/Paper";
+import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Block from "@material-ui/icons/Block";
 // @ts-ignore
@@ -9,38 +10,21 @@ import { NextAuth } from "next-auth/client";
 import Link from "next/link";
 import Router from "next/router";
 import React, { ReactNode, useCallback, useState } from "react";
+import DayPickerInput from "react-day-picker/DayPickerInput";
+import "react-day-picker/lib/style.css";
+import { CalendarItem, DisabledItem, EmptyItem } from "../components/calendar/gridItems";
+import {CustomDayPickerInput} from "../components/customDayPickerInput";
 import { AlertDialog } from "../components/dialogs/alertDialog";
 import Layout from "../components/layout/layout";
 import { ICourtCase, ICourtCases, ICourtCasesTuple } from "../dto";
-import { CalendarItem, DisabledItem, EmptyItem } from "../components/calendar/gridItems";
+import {getCalendarData} from "../actions/calendar.action";
 
 const calendarItemStyle: React.CSSProperties = { minWidth: "150px", minHeight: "75px" };
-
-const courtCaseTest: ICourtCase = {
-    fileNo: "Nr. eB2-1047-730/2018",
-    court: "Kauno Apylinkės Teismas",
-    courtNo: " Kauno rūmai",
-    firstName: "Vardenis",
-    lastName: "Pavardenis",
-    phoneNumber: "+37012345678",
-};
 
 interface IGridRowItem extends ICourtCases {
     rowIndex: number;
     disableGridItem(rowIndex: number, columnIndex: number): void;
 }
-
-const initialData: ICourtCases[] = [
-    { time: "8:00", courtCases: [null, courtCaseTest, null, null, null, null, { isDisabled: true }] },
-    { time: "8:30", courtCases: [null, null, null, null, null, null, courtCaseTest] },
-    { time: "9:00", courtCases: [null, null, courtCaseTest, null, null, null, null] },
-    { time: "9:30", courtCases: [null, null, null, null, courtCaseTest, null, null] },
-    { time: "10:00", courtCases: [null, null, null, null, null, null, null] },
-    { time: "10:30", courtCases: [null, courtCaseTest, null, courtCaseTest, null, null, null] },
-    { time: "11:00", courtCases: [null, null, null, null, null, courtCaseTest, null] },
-    { time: "11:30", courtCases: [courtCaseTest, null, null, courtCaseTest, null, null, null] },
-    { time: "12:00", courtCases: [null, null, null, courtCaseTest, null, courtCaseTest, null] },
-];
 
 interface IProps {
     session: any;
@@ -54,7 +38,7 @@ export default class Calendar extends React.Component<IProps, IState> {
     constructor(props) {
         super(props);
         this.state = {
-            data: initialData,
+            data: props.calendarData,
         };
 
         this.disableGridItem = this.disableGridItem.bind(this);
@@ -62,15 +46,18 @@ export default class Calendar extends React.Component<IProps, IState> {
     }
 
     public static async getInitialProps({ req }) {
+        req && console.log(req.slug);
+        const initialCalendarData = await getCalendarData();
         return {
-            session: await NextAuth.init({ req, force: true })
-        }
+            calendarData: initialCalendarData,
+            session: await NextAuth.init({ req, force: true }),
+        };
     }
 
     public render() {
         return (
             <Layout>
-                <Typography variant="h3">Calendar</Typography>
+                <CustomDayPickerInput/>
                 <Grid container style={{ marginTop: "24px" }} >
                     <GridColumnHeadings disableGridColumn={this.disableGridColumn} columnCount={7}></GridColumnHeadings>
                     {this.state.data.map((o, index) => <CalendarRow time={o.time} courtCases={o.courtCases} rowIndex={index} disableGridItem={this.disableGridItem}></CalendarRow>)}
