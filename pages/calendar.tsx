@@ -46,7 +46,7 @@ export default class Calendar extends React.Component<IProps, IState> {
     }
 
     public static async getInitialProps({ req }) {
-        req && console.log(req.slug);
+        // req && console.log(req.slug);
         const initialCalendarData = await getCalendarData();
         return {
             calendarData: initialCalendarData,

@@ -16,7 +16,15 @@ class PostgresPool {
         this.pool = new Pool(this.config);
         console.log("Pool initiated.");
         this.createTables();
-        this.seedUsers();
+        // this.seedUsers();
+    }
+
+    public getPool(): Pool {
+        if (this.pool) {
+            return this.pool;
+        }
+        this.pool = new Pool(this.config);
+        return this.pool;
     }
 
     private createTables() {
@@ -24,22 +32,45 @@ class PostgresPool {
             `CREATE TABLE IF NOT EXISTS
             users(
               id UUID PRIMARY KEY,
-              first_name VARCHAR(128) NOT NULL,
-              last_name VARCHAR(128) NOT NULL,
+              firstName VARCHAR(128) NOT NULL,
+              lastName VARCHAR(128) NOT NULL,
               email VARCHAR(128) NOT NULL,
               password VARCHAR(128),
-              phone_number VARCHAR(128) NOT NULL,
+              phoneNumber VARCHAR(128) NOT NULL,
               court VARCHAR(128) NOT NULL,
-              created_date TIMESTAMP,
-              modified_date TIMESTAMP
-            )`;
+              dateCreated TIMESTAMP,
+              dateModified TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS
+            calendars(
+                id UUID PRIMARY KEY,
+                date DATE UNIQUE
+            );
+
+            CREATE TABLE IF NOT EXISTS
+            courtCases(
+                id UUID PRIMARY KEY,
+                fileNo VARCHAR(128),
+                calendarDate DATE REFERENCES calendars(date) ON DELETE RESTRICT,
+                time TIME NOT NULL,
+                court VARCHAR(128),
+                courtNo VARCHAR(128),
+                firstName VARCHAR(128),
+                lastName VARCHAR(128),
+                phoneNumber VARCHAR(128),
+                isDisabled BOOLEAN,
+                dateCreated TIMESTAMP,
+                dateModified TIMESTAMP
+            );
+            `;
 
         this.pool.query(queryText)
             .then((res) => {
-                // console.log(res);
+                console.log("CREATE TABLES IF NOT EXISTS", res);
             })
             .catch((err) => {
-                // console.log(err);
+                console.log(err);
             });
     }
 
@@ -64,19 +95,10 @@ class PostgresPool {
                 // console.log(res);
             })
             .catch((err) => {
-                // console.log(err);
+                console.log(err);
             });
     }
-
-    public getPool() {
-        if (this.pool) {
-            return this.pool;
-        }
-        this.pool = new Pool(this.config);
-        return this.pool;
-    }
 }
-
 
 const postgresPool = new PostgresPool();
 export default postgresPool.getPool();

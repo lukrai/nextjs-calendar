@@ -4,6 +4,7 @@ import { parse } from 'url'
 import PostgressPool from "./postgresPool";
 import * as next from "next";
 import UserRouter from "./routes/user.router";
+import CalendarRouter from "./routes/calendar.router";
 
 // import * as express from 'express';
 import * as bodyParser from "body-parser";
@@ -58,6 +59,7 @@ nextApp.prepare()
 		expressApp.use(loggerMiddleware);
 
 		expressApp.use('/api/user', UserRouter);
+		expressApp.use('/api/calendar', CalendarRouter);
 
 		// expressApp.get('/users', db.getUsers)
 		// expressApp.get('/users/:id', db.getUserById)
@@ -68,18 +70,6 @@ nextApp.prepare()
 		expressApp.get('/a', (req: any, res: any) => {
 			return res.send({ a: " AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA " });
 		})
-
-		expressApp.get('/calendar/', (req, res) => {
-			console.log(req.params)
-			return expressApp.render(req, res, '/calendar');
-			// return app.render(req, res, "/calendar", { slug: req.params.slug })
-		  });
-
-		expressApp.get('/calendar/:slug', (req, res) => {
-			console.log(req.params)
-			return expressApp.render(req, res, '/calendar', { slug: req.params.slug } );
-			// return app.render(req, res, "/calendar", { slug: req.params.slug })
-		  });
 
 		expressApp.get('*', (req: any, res: any) => {
 			return handle(req, res)
