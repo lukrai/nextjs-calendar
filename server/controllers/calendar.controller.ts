@@ -24,76 +24,71 @@ export class CalendarController {
             console.log("rows ", calendar.rows);
             console.log("rowsCount ", calendar.rowCount);
 
-            let someDate = new Date();
-            const numberOfDaysToAdd = 40;
-            someDate.setDate(someDate.getDate() + numberOfDaysToAdd);
-            if (someDate.getDay() !== 3) {
-                
-            }
-
-            console.log("nextWeekDay ",this.getNextDayOfWeek(new Date(), 3, 40));
-            console.log(someDate.getDay());
+            // let requestDate = new Date(req.body.date);
+            // if(requestDate.getDay() !== 3) {
+            //     requestDate = this.getNextDayOfWeek(requestDate, 3, 0);
+            //     console.log("Changed date to wedneday ", requestDate);
+            // }                
+            const requestDate = this.getNextDayOfWeek(new Date(), 3, 40);
+            console.log("nextWeekDay ", this.getNextDayOfWeek(new Date(), 3, 40));
             // calendar.rows[0].date < someDate.toISOString().slice(0, 10)
             console.log("-----------1---------");
             console.log("-----------11---------", calendar.rows[0].date);
-            if (calendar.rowCount > 0 && calendar.rows[0].date < someDate.toISOString().slice(0, 10) || calendar.rowCount === 0) {
+            let calendarDate = calendar.rows[0].date;
+            if (calendar.rowCount > 0 && calendar.rows[0].date < requestDate.toISOString().slice(0, 10) || calendar.rowCount === 0) {
                 console.log("-----------2---------");
                 const text = `INSERT INTO
                 calendars(id, date)
                 VALUES($1, $2)
                 returning *`;
 
-                const newDate = this.getNextDayOfWeek(new Date(), 3, 40);
-                console.log("newDate ", newDate);
                 const values = [
                     uuidv4(),
-                    someDate.toISOString().slice(0, 10),
+                    requestDate.toISOString().slice(0, 10),
                 ];
                 const { rows } = await this.pool.query(text, values);
-                return res.status(201).send(rows);
+                console.log(rows);
+                calendarDate = rows[0].date;
             }
+
+            const courtCases = await this.pool.query(`SELECT * FROM courtCases WHERE date = $1`, calendarDate);
+
+            if (courtCases.rowCount < 49) {
+                // check if time count is for each rows is less < 7
+                // proceed to add
+                const values = [
+                    uuidv4(),
+                    "file_no",
+                    calendarDate,
+                    "9:00",
+                    "KAT",
+                    "4",
+                    "Vardenis",
+                    "Pavardenis",
+                    "+370"
+                ];
+                const { rows } = await this.pool.query(`INSERT INTO courtCases(id, file_no, date, time, court, court_no, first_name, last_name, phone_number) VALUES($1, $2) returning *`, values);
+                console.log(rows);                
+                return res.status(201).send(rows);
+            } else {
+                // get next calendar date
+            }
+            // return res.status(201).send(rows);
         } catch (err) {
             console.log(err);
+            return res.status(404).send();
         }
         return res.json(newCourtCase);
     }
 
-    public getUsers = (req, res) => {
-        if (!req.user || !req.user.admin || req.user.admin !== true)
-            return res.status('403').end();
-        let page: number = 1;
-        let size: number = 25;
-        const query = req.query;
-        console.log(Object.entries(query).length);
-        console.log(Object.entries(query).length > 0);
-        if (Object.entries(query).length > 0 && req.query.page && parseInt(req.query.page) > 0) {
-            page = parseInt(req.query.page);
-        }
-
-        // const page = (req.query.page && parseInt(req.query.page) > 0) ? parseInt(req.query.page) : 1;
-        // const sort = (req.query.sort) ? { [req.query.sort]: 1 } : {}
-
-        if (Object.entries(query).length > 0 && req.query.size && parseInt(req.query.size) > 0 && parseInt(req.query.size) < 500) {
-            size = parseInt(req.query.size);
-        }
-        this.pool.query(`SELECT * FROM users ORDER BY last_name LIMIT ${size} OFFSET ${(page - 1) * size}`, (error, results) => {
-            if (error) {
-                // throw error;
-                return res.status('404').send();
-            }
-            res.status(200).json(results.rows)
-        })
-    }
-
     private getNextDayOfWeek(date, dayOfWeek: number, offset: number) {
-        let someDate = new Date();
-        someDate.setDate(someDate.getDate() + offset);
+        let resultDate = new Date(date.getTime());
+        resultDate.setDate(resultDate.getDate() + offset);
 
-        let resultDate = new Date(someDate.getTime());
-        console.log("someDate", someDate);
+        console.log("someDate", date);
         console.log("resultDate", resultDate);
-        // resultDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
-        resultDate.setDate(someDate.getDate() + ((dayOfWeek + 7 - someDate.getDay()) % 7));
+
+        resultDate.setDate(resultDate.getDate() + ((7 + dayOfWeek - resultDate.getDay()) % 7));
         return resultDate;
     }
 }
