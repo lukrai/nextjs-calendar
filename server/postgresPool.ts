@@ -32,14 +32,14 @@ class PostgresPool {
             `CREATE TABLE IF NOT EXISTS
             users(
               id UUID PRIMARY KEY,
-              firstName VARCHAR(128) NOT NULL,
-              lastName VARCHAR(128) NOT NULL,
+              first_name VARCHAR(128) NOT NULL,
+              last_name VARCHAR(128) NOT NULL,
               email VARCHAR(128) NOT NULL,
               password VARCHAR(128),
-              phoneNumber VARCHAR(128) NOT NULL,
+              phone_number VARCHAR(128) NOT NULL,
               court VARCHAR(128) NOT NULL,
-              dateCreated TIMESTAMP,
-              dateModified TIMESTAMP
+              date_created TIMESTAMP,
+              date_modified TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS
@@ -51,17 +51,17 @@ class PostgresPool {
             CREATE TABLE IF NOT EXISTS
             courtCases(
                 id UUID PRIMARY KEY,
-                fileNo VARCHAR(128),
-                calendarDate DATE REFERENCES calendars(date) ON DELETE RESTRICT,
+                file_no VARCHAR(128),
+                calendar_date DATE REFERENCES calendars(date) ON DELETE RESTRICT,
                 time TIME NOT NULL,
                 court VARCHAR(128),
-                courtNo VARCHAR(128),
-                firstName VARCHAR(128),
-                lastName VARCHAR(128),
-                phoneNumber VARCHAR(128),
-                isDisabled BOOLEAN,
-                dateCreated TIMESTAMP,
-                dateModified TIMESTAMP
+                court_no VARCHAR(128),
+                first_name VARCHAR(128),
+                last_name VARCHAR(128),
+                phone_number VARCHAR(128),
+                is_disabled BOOLEAN,
+                date_created TIMESTAMP,
+                date_modified TIMESTAMP
             );
             `;
 
@@ -76,7 +76,7 @@ class PostgresPool {
 
     private seedUsers() {
         const queryText = `INSERT INTO
-              users(id, firstName, lastName, email, phoneNumber, court, dateCreated, dateModified)
+              users(id, first_name, last_name, email, phone_number, court, date_created, date_modified)
               VALUES($1, $2, $3, $4, $5, $6, $7, $8)
               returning *`;
         const values = [

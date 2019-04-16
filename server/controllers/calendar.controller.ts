@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
-import { Pool } from 'pg';
+import { NextFunction, Request, Response } from "express";
+import { Pool } from "pg";
+import * as uuidv4 from "uuid/v4";
 import postgresPool from "../postgresPool";
-import uuidv4 from 'uuid/v4';
 
 export class CalendarController {
     private pool: Pool;
@@ -11,28 +11,49 @@ export class CalendarController {
         this.pool = postgresPool;
     }
 
-    public async addCourtCase(req: Request, res: Response) {
+    public addCourtCase = async (req: Request, res: Response) => {
         let newCourtCase = req.body;
         console.log(req.body);
         try {
             // get Latest date
-            await this.pool.query(`SELECT * FROM calendars`);
+            const calendar = await this.pool.query(`SELECT id, TO_CHAR(date, 'YYYY-MM-DD') as date FROM calendars ORDER BY date DESC LIMIT 1`);
             // if latest date is 'today' + 40 day and is wedneday then ok,
             // else create wedneday which is + 40 (additional function) 
             // insert the record.
-            const text = `INSERT INTO 
-            calendars(id, date)
-            VALUES($1, $2)
-            returning *`;
+            console.log("-----------0---------");
+            console.log("rows ", calendar.rows);
+            console.log("rowsCount ", calendar.rowCount);
 
-            const values = [
-                uuidv4(),
-                new Date().toISOString().slice(0, 10),
-            ];
-            const { rows } = await this.pool.query(text, values);
+            let someDate = new Date();
+            const numberOfDaysToAdd = 40;
+            someDate.setDate(someDate.getDate() + numberOfDaysToAdd);
+            if (someDate.getDay() !== 3) {
+                
+            }
 
+            console.log("nextWeekDay ",this.getNextDayOfWeek(new Date(), 3, 40));
+            console.log(someDate.getDay());
+            // calendar.rows[0].date < someDate.toISOString().slice(0, 10)
+            console.log("-----------1---------");
+            console.log("-----------11---------", calendar.rows[0].date);
+            if (calendar.rowCount > 0 && calendar.rows[0].date < someDate.toISOString().slice(0, 10) || calendar.rowCount === 0) {
+                console.log("-----------2---------");
+                const text = `INSERT INTO
+                calendars(id, date)
+                VALUES($1, $2)
+                returning *`;
+
+                const newDate = this.getNextDayOfWeek(new Date(), 3, 40);
+                console.log("newDate ", newDate);
+                const values = [
+                    uuidv4(),
+                    someDate.toISOString().slice(0, 10),
+                ];
+                const { rows } = await this.pool.query(text, values);
+                return res.status(201).send(rows);
+            }
         } catch (err) {
-            // console.log(err);
+            console.log(err);
         }
         return res.json(newCourtCase);
     }
@@ -62,5 +83,17 @@ export class CalendarController {
             }
             res.status(200).json(results.rows)
         })
+    }
+
+    private getNextDayOfWeek(date, dayOfWeek: number, offset: number) {
+        let someDate = new Date();
+        someDate.setDate(someDate.getDate() + offset);
+
+        let resultDate = new Date(someDate.getTime());
+        console.log("someDate", someDate);
+        console.log("resultDate", resultDate);
+        // resultDate.setDate(date.getDate() + (7 + dayOfWeek - date.getDay()) % 7);
+        resultDate.setDate(someDate.getDate() + ((dayOfWeek + 7 - someDate.getDay()) % 7));
+        return resultDate;
     }
 }
