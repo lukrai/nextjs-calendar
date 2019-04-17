@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Pool } from "pg";
 import * as uuidv4 from "uuid/v4";
 import postgresPool from "../postgresPool";
+import { availableCalendarTimes } from "../../dto";
 
 export class CalendarController {
     private pool: Pool;
@@ -53,7 +54,17 @@ export class CalendarController {
 
             const courtCases = await this.pool.query(`SELECT * FROM courtCases WHERE date = $1`, calendarDate);
 
-            if (courtCases.rowCount < 49) {
+            if (courtCases.rowCount < availableCalendarTimes.length * 7) {
+                let rowIndex = 0;
+                let columnIndex = 0;
+                for (let i = 0; i < courtCases.rowCount; i += 1) {
+                    columnIndex += 1;
+                    if (columnIndex >= 7) {
+                        rowIndex += 1;
+                        columnIndex = 0;
+                    }
+                }
+
                 // check if time count is for each rows is less < 7
                 // proceed to add
                 const values = [
@@ -61,14 +72,14 @@ export class CalendarController {
                     "file_no",
                     calendarDate,
                     "9:00",
-                    "KAT",
+                    availableCalendarTimes[rowIndex],
                     "4",
                     "Vardenis",
                     "Pavardenis",
-                    "+370"
+                    "+370",
                 ];
                 const { rows } = await this.pool.query(`INSERT INTO courtCases(id, file_no, date, time, court, court_no, first_name, last_name, phone_number) VALUES($1, $2) returning *`, values);
-                console.log(rows);                
+                console.log(rows);
                 return res.status(201).send(rows);
             } else {
                 // get next calendar date
