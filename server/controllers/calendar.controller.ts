@@ -52,7 +52,7 @@ export class CalendarController {
                 calendarDate = rows[0].date;
             }
 
-            const courtCases = await this.pool.query(`SELECT * FROM courtCases WHERE date = $1`, calendarDate);
+            const courtCases = await this.pool.query(`SELECT * FROM courtCases WHERE calendar_date = $1`, [calendarDate]);
 
             if (courtCases.rowCount < availableCalendarTimes.length * 7) {
                 let rowIndex = 0;
@@ -78,7 +78,7 @@ export class CalendarController {
                     "Pavardenis",
                     "+370",
                 ];
-                const { rows } = await this.pool.query(`INSERT INTO courtCases(id, file_no, date, time, court, court_no, first_name, last_name, phone_number) VALUES($1, $2) returning *`, values);
+                const { rows } = await this.pool.query(`INSERT INTO courtCases(id, file_no, calendar_date, time, court, court_no, first_name, last_name, phone_number) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) returning *`, values);
                 console.log(rows);
                 return res.status(201).send(rows);
             } else {
