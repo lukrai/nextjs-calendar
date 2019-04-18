@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Pool } from "pg";
 import * as uuidv4 from "uuid/v4";
-import postgresPool from "../postgresPool";
+import postgresPool, { query } from "../postgresPool";
 import { availableCalendarTimes } from "../../dto";
 
 export class CalendarController {
@@ -71,8 +71,8 @@ export class CalendarController {
                     uuidv4(),
                     "file_no",
                     calendarDate,
-                    "9:00",
                     availableCalendarTimes[rowIndex],
+                    "KAT",
                     "4",
                     "Vardenis",
                     "Pavardenis",

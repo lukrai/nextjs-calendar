@@ -102,3 +102,11 @@ class PostgresPool {
 
 const postgresPool = new PostgresPool();
 export default postgresPool.getPool();
+
+export async function query(text, params) {
+    try {
+        return postgresPool.getPool().query(text, params);
+    } catch (err) {
+        console.log(err);
+    }
+}
